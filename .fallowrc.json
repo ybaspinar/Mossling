@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
-  "ignorePatterns": ["**/*.d.ts", "node_modules/**", "dist/**", "*.config.*", ".husky/**"],
+  "entry": ["src/main.ts", "vite.config.ts", "vite-plus.config.ts", "svelte.config.js"],
+  "ignorePatterns": ["**/*.d.ts", "node_modules/**", "dist/**", ".husky/**"],
   "rules": {
     "unused-files": "warn",
     "unused-exports": "warn",

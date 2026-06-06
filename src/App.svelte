@@ -1,89 +1,90 @@
-<script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from './assets/vite.svg'
-  import heroImg from './assets/hero.png'
-  import Counter from './lib/Counter.svelte'
+<script lang="ts">
+  import AquariumCanvas from './lib/AquariumCanvas.svelte'
+  import { createAquariumConfig } from './scene/config'
+  import { normalizeSeed } from './scene/seed'
+
+  const initialSeed = new URLSearchParams(window.location.search).get('seed') ?? 'mossling'
+  const initialNormalizedSeed = normalizeSeed(initialSeed)
+
+  let seedInput = $state(initialNormalizedSeed)
+  let activeSeed = $state(initialNormalizedSeed)
+  let uiHidden = $state(false)
+  let copyMessage = $state('')
+
+  const config = $derived(createAquariumConfig(activeSeed))
+
+  function applySeed(): void {
+    activeSeed = normalizeSeed(seedInput)
+    seedInput = activeSeed
+    updateUrl(activeSeed)
+  }
+
+  function randomizeSeed(): void {
+    const nextSeed = normalizeSeed('')
+    seedInput = nextSeed
+    activeSeed = nextSeed
+    updateUrl(nextSeed)
+  }
+
+  async function copyLink(): Promise<void> {
+    const url = new URL(window.location.href)
+    url.searchParams.set('seed', activeSeed)
+    await navigator.clipboard.writeText(url.toString())
+    copyMessage = 'Copied link'
+    window.setTimeout(() => {
+      copyMessage = ''
+    }, 1600)
+  }
+
+  async function enterFullscreen(): Promise<void> {
+    if (document.fullscreenElement === null) {
+      await document.documentElement.requestFullscreen()
+    }
+  }
+
+  function updateUrl(seed: string): void {
+    const url = new URL(window.location.href)
+    url.searchParams.set('seed', seed)
+    window.history.replaceState(null, '', url)
+  }
 </script>
 
-<section id="center">
-  <div class="hero">
-    <img src={heroImg} class="base" width="170" height="179" alt="" />
-    <img src={svelteLogo} class="framework" alt="Svelte logo" />
-    <img src={viteLogo} class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/App.svelte</code> and save to test <code>HMR</code></p>
-  </div>
-  <Counter />
-</section>
+<main class:ui-hidden={uiHidden}>
+  <AquariumCanvas {config} />
 
-<div class="ticks"></div>
+  <section class="panel" aria-label="Aquarium controls">
+    <div class="brand">
+      <p>Mossling</p>
+      <h1>Ambient betta aquarium</h1>
+    </div>
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#documentation-icon"></use>
-    </svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank" rel="noreferrer">
-          <img class="logo" src={viteLogo} alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://svelte.dev/" target="_blank" rel="noreferrer">
-          <img class="button-icon" src={svelteLogo} alt="" />
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#social-icon"></use>
-    </svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li>
-        <a href="https://github.com/vitejs/vite" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#github-icon"></use>
-          </svg>
-          GitHub
-        </a>
-      </li>
-      <li>
-        <a href="https://chat.vite.dev/" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#discord-icon"></use>
-          </svg>
-          Discord
-        </a>
-      </li>
-      <li>
-        <a href="https://x.com/vite_js" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#x-icon"></use>
-          </svg>
-          X.com
-        </a>
-      </li>
-      <li>
-        <a href="https://bsky.app/profile/vite.dev" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#bluesky-icon"></use>
-          </svg>
-          Bluesky
-        </a>
-      </li>
-    </ul>
-  </div>
-</section>
+    <form
+      class="seed-form"
+      onsubmit={(event) => {
+        event.preventDefault()
+        applySeed()
+      }}
+    >
+      <label for="seed">Seed</label>
+      <div class="seed-row">
+        <input id="seed" bind:value={seedInput} autocomplete="off" spellcheck="false" />
+        <button type="submit">Apply</button>
+      </div>
+    </form>
 
-<div class="ticks"></div>
-<section id="spacer"></section>
+    <div class="actions">
+      <button type="button" onclick={randomizeSeed}>Randomize</button>
+      <button type="button" onclick={() => void copyLink()}>Copy link</button>
+      <button type="button" onclick={() => void enterFullscreen()}>Fullscreen</button>
+      <button type="button" onclick={() => { uiHidden = true }}>Hide UI</button>
+    </div>
+
+    {#if copyMessage !== ''}
+      <p class="copy-message" role="status">{copyMessage}</p>
+    {/if}
+  </section>
+
+  {#if uiHidden}
+    <button class="show-ui" type="button" onclick={() => { uiHidden = false }}>Show UI</button>
+  {/if}
+</main>
