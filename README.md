@@ -12,18 +12,19 @@ A Svelte SPA built with Vite+, TypeScript (@tsconfig/strictest), and Fallow stat
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start dev server |
-| `pnpm build` | Production build |
-| `pnpm preview` | Preview production build |
-| `pnpm check` | Type-check Svelte + TypeScript |
-| `pnpm check:fallow` | Run Fallow static analysis |
-| `pnpm check:all` | Run all checks |
+| Command             | Description                    |
+| ------------------- | ------------------------------ |
+| `pnpm dev`          | Start dev server               |
+| `pnpm build`        | Production build               |
+| `pnpm preview`      | Preview production build       |
+| `pnpm check`        | Type-check Svelte + TypeScript |
+| `pnpm check:fallow` | Run Fallow static analysis     |
+| `pnpm check:all`    | Run all checks                 |
 
 ## Pre-commit Checks
 
 Husky runs `pnpm check:all` before every commit, which includes:
+
 - Svelte type-checking (`svelte-check`)
 - TypeScript node config check (`tsc`)
 - Fallow static intelligence analysis
